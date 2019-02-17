@@ -26,13 +26,13 @@ class Participant:
 		v = 0
 		for j in range(len(points)):
 			y = points[j][1]
-			l = basis(points, self.share[0], j)
+			l = self.basis(points, 0, j)
 			v += y*l
-		v = v % q
+		v = v % self.q
 		return self.mod_pow(self.g, v, self.p)
 
 	# jth basis at x 
-	def basis(points, x, j):
+	def basis(self, points, x, j):
 		val = 1
 		for m in range(len(points)):
 			if not m == j:
@@ -46,7 +46,17 @@ class Participant:
 	# This function simulates a participant querying all other participants to see whether
 	# or not they can recover the secret
 	def query_participants(self, all_participants, query):
+		secret = self.partial_interpolate(all_participants)
 		
+		actual = self.g ** (secret * self.a)
+		actual = actual % self.p
+
+		guess = self.g ** (query * self.a)
+		guess = guess % self.p
+
+		print actual, guess
+
+		return actual == guess
 
 
 	# val: the secret
@@ -62,11 +72,13 @@ class Participant:
 		ys = []
 		for i in range(k):
 			p = 0
-			while p == 0 or p in xs:
+			fp = 0
+			while p == 0 or p in xs or fp == 0:
 				p = randint(-r, r)
+				fp = polyVal(coefs, p) % q
 
 			xs.append(p)
-			ys.append(polyVal(coefs, p) % q) #?
+			ys.append(fp) #?
 		
 		keys = [(xs[i], ys[i]) for i in range(len(xs))]
 
@@ -74,7 +86,7 @@ class Participant:
 			all_participants[i].share = keys[i]
 
 	# given list of coefficents for p, find p(x)
-	def polyVal(coefs, x):
+	def polyVal(self, coefs, x):
 		val = 0
 		i = 0
 		for c in coefs:
@@ -97,7 +109,12 @@ class Participant:
 	def mod_pow(self, b, p, q):
 		total = 1
 		current = b
-		for bit in bin(p)[2::][::-1]: #for bit in binary of p from lsb->msb
+
+		binary = bin(int(p))
+		binary = binary[2:]
+		binary = binary[::-1]
+
+		for bit in binary:
 			if bit == '1':
 				total = (total * current) % q
 			current = (current ** 2) % q
