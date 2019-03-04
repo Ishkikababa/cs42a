@@ -59,11 +59,10 @@ def test_prime(p, chance_false):
 		a = randint(2, p-1)
 		foundBadD = not (mod_pow(a, d, p) == 1 or mod_pow(a, d, p) == p-1)
 		
-		# check a^(2^r * d), r between 1, s-1
+		# check a^(2^r * d), r from 1 to s-1
 		foundGoodR = False	
 		for r in range(1, s):
 			n = mod_pow(a, d*(2**r), p)
-			#print n, ",", p-1
 			if (n == p-1): 
 				foundGoodR = True
 		
@@ -71,19 +70,6 @@ def test_prime(p, chance_false):
 			failedTest = True
 
 	return not failedTest
-
-# ** Optional function ** - not necessary for full points
-# Should be an implementation of the Chinese Remainder Theorem
-# Should calculate numbers a and b such that a = m mod p and b = n mod q.
-def crt(m, p, n, q ):
-	a,b = 0,0
-
-	while not a % p == m:
-		a += 1
-	while not b % q == n:
-		b += 1
-
-	return a,b
 
 # encrypts message m using the public key kpub
 # returns a numerical ciphertext.
@@ -101,25 +87,18 @@ def key_gen(keylength):
 	kpub = []  # n, e
 	kpriv = [] # n, e, d, p, q, d mod(p-1), d mod(q-1), inverse(p, q), inverse(q, p)
 
-	l,h = 2, keylength/2
-	p,q = get_prime(l, h), get_prime(l, h)
+	halflen = keylength/2
+
+	l, h = 10**(halflen/2), 100**(halflen/2)
+	p, q = 1,1
 	while p == q:
-		q = get_prime(l, h)
+		p,q = get_prime(l,h),get_prime(l,h)
 
 	n = p*q
+
 	kpub.append(n)
 	kpriv.append(n)
-	"""
-	e = randint(1, l)
-	while gcd(e, (p-1)*(q-1)) == 1:
-		e = randint(1, l)
-	kpub.append(e)
-	kpriv.append(e)
 
-	d = inverse(e, (p-1)*(q-1))
-	print gcd(e, (p-1)*(q-1))
-	kpriv.append(d)
-	"""	
 	e = randint(1, p)
 	d = inverse(e, (p-1)*(q-1))
 
