@@ -87,9 +87,7 @@ def key_gen(keylength):
 	kpub = []  # n, e
 	kpriv = [] # n, e, d, p, q, d mod(p-1), d mod(q-1), inverse(p, q), inverse(q, p)
 
-	halflen = keylength/2
-
-	l, h = 10**(halflen/2), 100**(halflen/2)
+	l, h = 10**(keylength/2), 100**(keylength/2)
 	p, q = 1,1
 	while p == q:
 		p,q = get_prime(l,h),get_prime(l,h)
