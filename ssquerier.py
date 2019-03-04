@@ -24,11 +24,13 @@ class Participant:
 	def partial_interpolate(self, all_participants):
 		points = [p.share for p in all_participants]
 		v = 0
-		print "keys2: ", points
+
 		for j in range(len(points)):
 			y = points[j][1]
-			l = self.basis(points, self.share[0], j)
+			l = self.basis(points, 0, j) #?
+
 			v += y*l
+
 		v = v % self.q
 		return mod_pow(self.g, v, self.p)
 
@@ -41,12 +43,13 @@ class Participant:
 				b = points[j][0] - points[m][0]
 				
 				if b == 0:
-					print "\nFUCK: ", points[j][0], points[m][0], " || ", j, m
+					pass
+					#print "\noh no: ", points[j][0], points[m][0], " || ", j, m
 				else: 
 					v = Fraction(a)/Fraction(b)
 					val *= v
-		return val
 
+		return val
 
 	# This function simulates a participant querying all other participants to see whether
 	# or not they can recover the secret
@@ -59,7 +62,8 @@ class Participant:
 		guess = self.g ** (query * self.a)
 		guess = guess % self.p
 
-		print actual, guess
+		#print "actual: ", actual
+		#print "guess: ", guess
 
 		return actual == guess
 
@@ -68,23 +72,23 @@ class Participant:
 # k: the number of valid participant shares needed to recover the secret
 # q: the prime you mod by as you'll be working in mod q
 def distribute_shares(all_participants, val, k, q):
-	print "sec: ", val
 	r = 1000
-	neg = [1, 1] #################
+	neg = [1, -1] #################
 	coefs = [choice(neg) * Fraction(randint(1, r), randint(1, r)) for i in range(0, k-1)]
 	coefs.insert(0, val)
 
 	keys = set([])
 	
+	#keep adding unique keys
 	while len(keys) < len(all_participants):
 		p = randint(1, r)
 		fp = polyVal(coefs, p)
-		keys.add((p % q, fp % q))
+		keys.add((p%q, fp%q))
 
-	print "keys1: ", keys
+	keys = list(keys)
 
 	for i in range(len(all_participants)):
-		all_participants[i].share = keys.pop()
+		all_participants[i].share = keys[i]
 
 # given list of coefficents for p, find p(x)
 def polyVal(coefs, x):
@@ -128,7 +132,6 @@ def inverse(x, q):
 
 	for i in range(1, q):
 		if (i * x) % q == 1:
-			print i
 			return i
 
 	return None

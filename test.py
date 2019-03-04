@@ -1,8 +1,9 @@
 from ssquerier import Participant
-from ssquerier import inverse
+from ssquerier import distribute_shares
 from random import randint, choice
+from rsa import test_prime
 
 if __name__ == "__main__":
-	temp = Participant(1,2,3,4,5)
-	val = inverse(43287, 3617)
-	print val
+	for i in range(10):
+		p = randint(3, 100)
+		print p, test_prime(p, 4**-5)
